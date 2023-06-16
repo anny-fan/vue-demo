@@ -13,6 +13,7 @@
             class="arrow"
             :class="sortColumns[key] > 0 ? 'asc' : 'dsc'"
           ></span>
+          {{ sortColumns[key] }}
         </th>
       </tr>
     </thead>
@@ -36,19 +37,18 @@ const props = defineProps({
 let sortKey = $ref("");
 
 const filteredTitles = computed(() => {
-  const filterKey = props.filterKey && props.filterKey.toLowerCase();
-  const order = sortColumns[sortKey] || 1;
+  const filterKey = props.filterKey?.toLowerCase();
+  const order = sortColumns.value[sortKey] || 1;
   let entries = props.entries;
   if (filterKey) {
     entries = entries.filter(function (row) {
       return Object.keys(row).some(function (key) {
-        // console.log(row[key]);
         return String(row[key]).toLowerCase().indexOf(filterKey) > -1;
       });
     });
   }
   if (sortKey) {
-    entries = entries.slice().sort(function (x, y) {
+    entries = entries.sort(function (x, y) {
       x = x[sortKey];
       y = y[sortKey];
       return (x === y ? 0 : x > y ? 1 : -1) * order;
@@ -57,15 +57,18 @@ const filteredTitles = computed(() => {
   return entries;
 });
 
-function sortColumns() {
-  const sortedColumns = {};
+const sortColumns = computed({
+  get() {
+    console.log("sortComuns computed");
+    const sortedColumns = {};
+    props.columns.forEach(function (key) {
+      sortedColumns[key] = 1;
+    });
 
-  columns.forEach(function (key) {
-    sortedColumns[key] = 1;
-  });
-
-  return sortedColumns;
-}
+    return sortedColumns;
+  },
+  set() {},
+});
 
 // helper methods
 function capitalize(inputString) {
@@ -73,7 +76,8 @@ function capitalize(inputString) {
 }
 function sortBy(key) {
   sortKey = key;
-  sortColumns[key] = sortColumns[key] * -1;
+  console.log(sortColumns.value[key]);
+  sortColumns.value[key] *= -1; // 無法修改computed
 }
 </script>
 
