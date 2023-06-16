@@ -13,7 +13,6 @@
             class="arrow"
             :class="sortColumns[key] > 0 ? 'asc' : 'dsc'"
           ></span>
-          {{ sortColumns[key] }}
         </th>
       </tr>
     </thead>
@@ -35,10 +34,11 @@ const props = defineProps({
 });
 
 let sortKey = $ref("");
+const sortColumns = $ref([]);
 
 const filteredTitles = computed(() => {
   const filterKey = props.filterKey?.toLowerCase();
-  const order = sortColumns.value[sortKey] || 1;
+  const order = sortColumns[sortKey] || 1;
   let entries = props.entries;
   if (filterKey) {
     entries = entries.filter(function (row) {
@@ -57,18 +57,14 @@ const filteredTitles = computed(() => {
   return entries;
 });
 
-const sortColumns = computed({
-  get() {
-    console.log("sortComuns computed");
-    const sortedColumns = {};
-    props.columns.forEach(function (key) {
-      sortedColumns[key] = 1;
-    });
-
-    return sortedColumns;
-  },
-  set() {},
-});
+// Initialize sortColumns
+const initSortColumns = () => {
+  props.columns.forEach((key) => {
+    sortColumns[key] = 1;
+    console.log(sortColumns);
+  });
+};
+initSortColumns();
 
 // helper methods
 function capitalize(inputString) {
@@ -76,8 +72,8 @@ function capitalize(inputString) {
 }
 function sortBy(key) {
   sortKey = key;
-  console.log(sortColumns.value[key]);
-  sortColumns.value[key] *= -1; // 無法修改computed
+  console.log(sortColumns[key]);
+  sortColumns[key] *= -1;
 }
 </script>
 
