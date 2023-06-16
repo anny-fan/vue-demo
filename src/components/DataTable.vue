@@ -61,7 +61,6 @@ const filteredTitles = computed(() => {
 const initSortColumns = () => {
   props.columns.forEach((key) => {
     sortColumns[key] = 1;
-    console.log(sortColumns);
   });
 };
 initSortColumns();
@@ -72,14 +71,18 @@ function capitalize(inputString) {
 }
 function sortBy(key) {
   sortKey = key;
-  console.log(sortColumns[key]);
   sortColumns[key] *= -1;
 }
 </script>
 
 <style lang="scss" scoped>
-th.active {
-  color: var(--bs-info);
+th {
+  &:hover {
+    cursor: pointer;
+  }
+  &.active {
+    color: var(--bs-info);
+  }
 }
 .arrow {
   display: inline-block;
