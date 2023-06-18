@@ -26,7 +26,7 @@
 
     <!-- 記事本 -->
     <div class="section">
-      <h1 class="display-4">simple notes</h1>
+      <h1 class="display-4">Simple Notes</h1>
       <p class="lead">左側新增、右側顯示及刪除</p>
       <div class="row">
         <div class="col-4">
@@ -75,7 +75,7 @@
                 <td class="text-center">
                   <button
                     class="btn btn-danger btn-sm rounded-circle"
-                    @click="deleteNote"
+                    @click="deleteNote(note)"
                   >
                     X
                   </button>
@@ -88,10 +88,13 @@
     </div>
 
     <!-- todo -->
-    <TodoList></TodoList>
+    <div class="section">
+      <TodoList></TodoList>
+    </div>
 
     <!-- data table -->
     <div class="section">
+      <h2 class="display-4">Filter/Sort Data</h2>
       <div class="row mb-3">
         <label for="searchField" class="col-form-label col-sm-2"
           >Search Field:</label
@@ -107,13 +110,24 @@
       ></DataTable>
     </div>
   </div>
+  <Modal
+    :show="showModal"
+    @close="showModal = false"
+    @confirm="confirmDeleteNote"
+  >
+    <template #header>Are you sure?</template>
+    Delete this note.
+    <!-- $emit無法在這邊用 -->
+    <!-- <template #footer></template> -->
+  </Modal>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import data from "@/db.json";
 import TodoList from "@/components/TodoList.vue";
 import DataTable from "@/components/DataTable.vue";
+import Modal from "@/components/Modal.vue";
 
 const posts = $ref(data);
 const SECTIONS_TW = "travel, health, tech";
@@ -123,7 +137,9 @@ const newNote = $ref({
   title: "",
   content: "",
 });
-const notes = $ref([]);
+const notes = $ref(JSON.parse(localStorage.getItem("notes")) || []);
+let showModal = $ref(false);
+let noteToDelete;
 
 const results = computed(() => {
   const filteredPosts = posts.filter((post) => post.category === section);
@@ -151,13 +167,31 @@ function addNote() {
 }
 
 function deleteNote(note) {
-  if (confirm("確定刪除？")) {
-    const ndx = notes.indexOf(note);
-    if (ndx !== -1) {
-      notes.splice(ntx, 1);
-    }
-  }
+  showModal = true;
+
+  // Set the note to be deleted
+  noteToDelete = note;
 }
+
+function confirmDeleteNote() {
+  const ndx = notes.indexOf(noteToDelete);
+  if (ndx !== -1) {
+    notes.splice(ndx, 1);
+  }
+  showModal = false;
+}
+
+function saveNotes() {
+  localStorage.setItem("notes", JSON.stringify(notes));
+}
+
+watch(
+  () => notes,
+  () => {
+    saveNotes();
+  },
+  { deep: true }
+);
 
 const searchInput = $ref("");
 const dataColumns = $ref(["title", "abstract", "category"]);
